@@ -78,10 +78,13 @@ def run(data_name):
     
     print(feat.shape)
     new_df.to_csv(OUT_DF)
+    
+          
     np.save(OUT_FEAT, feat)
     np.save(OUT_NODE_FEAT, rand_feat)
-    
-    
-run('wikipedia')
+    print(feat[0:3,])
+    print(rand_feat[0:3,])
+run('example')
+#run('wikipedia')
 
 #run('reddit')
