@@ -84,7 +84,7 @@ def run(data_name):
     np.save(OUT_NODE_FEAT, rand_feat)
     print(feat[0:3,])
     print(rand_feat[0:3,])
-run('example')
+#run('example')
 #run('wikipedia')
-
+run('wiki_1000')
 #run('reddit')

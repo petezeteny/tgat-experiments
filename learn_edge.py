@@ -83,11 +83,11 @@ logger.addHandler(ch)
 logger.info(args)
 
 
-def eval_one_epoch(hint, tgan, sampler, src, dst, ts, label):
+def eval_one_epoch(hint, tgan, sampler, src, dst, ts, label,test=False):
     val_acc, val_ap, val_f1, val_auc = [], [], [], []
     with torch.no_grad():
         tgan = tgan.eval()
-        TEST_BATCH_SIZE=30
+        TEST_BATCH_SIZE=1000
         num_test_instance = len(src)
         num_test_batch = math.ceil(num_test_instance / TEST_BATCH_SIZE)
         for k in range(num_test_batch):
@@ -114,6 +114,8 @@ def eval_one_epoch(hint, tgan, sampler, src, dst, ts, label):
             val_ap.append(average_precision_score(true_label, pred_score))
             # val_f1.append(f1_score(true_label, pred_label))
             val_auc.append(roc_auc_score(true_label, pred_score))
+            if test!= False:
+                print(tgan.getattention(src_l_cut, ts_l_cut, tgan.num_layers, NUM_NEIGHBORS))
     return np.mean(val_acc), np.mean(val_ap), np.mean(val_f1), np.mean(val_auc)
 
 ### Load data and train val test split
@@ -307,7 +309,7 @@ test_acc, test_ap, test_f1, test_auc = eval_one_epoch('test for old nodes', tgan
 test_dst_l, test_ts_l, test_label_l)
 
 nn_test_acc, nn_test_ap, nn_test_f1, nn_test_auc = eval_one_epoch('test for new nodes', tgan, nn_test_rand_sampler, nn_test_src_l, 
-nn_test_dst_l, nn_test_ts_l, nn_test_label_l)
+nn_test_dst_l, nn_test_ts_l, nn_test_label_l,test=True)
 
 logger.info('Test statistics: Old nodes -- acc: {}, auc: {}, ap: {}'.format(test_acc, test_auc, test_ap))
 logger.info('Test statistics: New nodes -- acc: {}, auc: {}, ap: {}'.format(nn_test_acc, nn_test_auc, nn_test_ap))

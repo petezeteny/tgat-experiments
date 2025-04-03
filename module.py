@@ -37,7 +37,6 @@ class ScaledDotProductAttention(torch.nn.Module):
 
         attn = torch.bmm(q, k.transpose(1, 2))
         attn = attn / self.temperature
-
         if mask is not None:
             attn = attn.masked_fill(mask, -1e10)
 
@@ -103,7 +102,6 @@ class MultiHeadAttention(nn.Module):
         output = self.dropout(self.fc(output))
         output = self.layer_norm(output + residual)
         #output = self.layer_norm(output)
-        
         return output, attn
     
 
@@ -453,13 +451,13 @@ class TGAN(torch.nn.Module):
 
     def contrast(self, src_idx_l, target_idx_l, background_idx_l, cut_time_l, num_neighbors=20):
         src_embed = self.tem_conv(src_idx_l, cut_time_l, self.num_layers, num_neighbors)
-        target_embed = self.tem_conv(target_idx_l, cut_time_l, self.num_layers, num_neighbors)
-        background_embed = self.tem_conv(background_idx_l, cut_time_l, self.num_layers, num_neighbors)
+        target_embed  = self.tem_conv(target_idx_l, cut_time_l, self.num_layers, num_neighbors)
+        background_embed= self.tem_conv(background_idx_l, cut_time_l, self.num_layers, num_neighbors)
         pos_score = self.affinity_score(src_embed, target_embed).squeeze(dim=-1)
         neg_score = self.affinity_score(src_embed, background_embed).squeeze(dim=-1)
         return pos_score.sigmoid(), neg_score.sigmoid()
 
-    def tem_conv(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20):
+    def tem_conv(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20,att=False):
         assert(curr_layers >= 0)
         
         device = self.n_feat_th.device
@@ -500,7 +498,7 @@ class TGAN(torch.nn.Module):
             src_ngh_node_conv_feat = self.tem_conv(src_ngh_node_batch_flat, 
                                                    src_ngh_t_batch_flat,
                                                    curr_layers=curr_layers - 1, 
-                                                   num_neighbors=num_neighbors)
+                                                   num_neighbors=num_neighbors,att=att)
             src_ngh_feat = src_ngh_node_conv_feat.view(batch_size, num_neighbors, -1)
             
             # get edge time features and node features
@@ -517,4 +515,12 @@ class TGAN(torch.nn.Module):
                                    src_ngh_t_embed, 
                                    src_ngn_edge_feat, 
                                    mask)
+            if att==True:
+                np.save('./saved_att/wiki1000_layer{}_weight'.format(curr_layers),weight.cpu().numpy())
+                np.save('./saved_att/wiki1000_layer{}_ngh'.format(curr_layers),src_ngh_eidx_batch.cpu().numpy())
             return local
+    def getattention(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20):
+            for layer in range(self.num_layers):
+                self.tem_conv(src_idx_l, cut_time_l, curr_layers=layer+1, num_neighbors=20,att=True)
+                
+            
