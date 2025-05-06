@@ -6,6 +6,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import json
+import os
+
 class MergeLayer(torch.nn.Module):
     def __init__(self, dim1, dim2, dim3, dim4):
         super().__init__()
@@ -457,7 +460,7 @@ class TGAN(torch.nn.Module):
         neg_score = self.affinity_score(src_embed, background_embed).squeeze(dim=-1)
         return pos_score.sigmoid(), neg_score.sigmoid()
 
-    def tem_conv(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20,att=False):
+    def tem_conv(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20,att=False,s_idx=0):
         assert(curr_layers >= 0)
         
         device = self.n_feat_th.device
@@ -478,7 +481,7 @@ class TGAN(torch.nn.Module):
             src_node_conv_feat = self.tem_conv(src_idx_l, 
                                            cut_time_l,
                                            curr_layers=curr_layers - 1, 
-                                           num_neighbors=num_neighbors)
+                                           num_neighbors=num_neighbors,s_idx=s_idx)
             
             
             src_ngh_node_batch, src_ngh_eidx_batch, src_ngh_t_batch = self.ngh_finder.get_temporal_neighbor( 
@@ -515,12 +518,34 @@ class TGAN(torch.nn.Module):
                                    src_ngh_t_embed, 
                                    src_ngn_edge_feat, 
                                    mask)
-            if att==True:
-                np.save('./saved_att/wiki1000_layer{}_weight'.format(curr_layers),weight.cpu().numpy())
-                np.save('./saved_att/wiki1000_layer{}_ngh'.format(curr_layers),src_ngh_eidx_batch.cpu().numpy())
+            if att==curr_layers:
+                filename="./saved_att/wikifull_uni_20ep.json"
+                if os.path.exists(filename):
+                    with open(filename, "r") as f:
+                        try:
+                            data = json.load(f)
+                        except json.JSONDecodeError:
+                            data = []
+                else:
+                    data = []
+                
+                heads= 2
+                src_len=len(src_idx_l)
+                for s in range(src_len):
+                    row_data = {
+                        "s": s+s_idx,
+                        "src_idx": src_idx_l[s].item(),
+                        "weights": [weight[s+h*src_len].tolist()for h in range(heads)],
+                        "ngh":src_ngh_eidx_batch[s].tolist()
+                    }
+                    data.append(row_data)
+                
+                with open(filename, "w") as f:
+                    json.dump(data, f, indent=4)
+
             return local
-    def getattention(self, src_idx_l, cut_time_l, curr_layers, num_neighbors=20):
+    def getattention(self, src_idx_l, cut_time_l, curr_layers, num_neighbors,s_idx):
             for layer in range(self.num_layers):
-                self.tem_conv(src_idx_l, cut_time_l, curr_layers=layer+1, num_neighbors=20,att=True)
+                self.tem_conv(src_idx_l, cut_time_l, curr_layers=layer+1, num_neighbors=20,att=layer+1,s_idx=s_idx)
                 
             

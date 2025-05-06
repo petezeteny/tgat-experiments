@@ -86,5 +86,5 @@ def run(data_name):
     print(rand_feat[0:3,])
 #run('example')
 #run('wikipedia')
-run('wiki_1000')
+run('wiki_50000')
 #run('reddit')

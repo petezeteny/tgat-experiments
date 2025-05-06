@@ -87,7 +87,7 @@ def eval_one_epoch(hint, tgan, sampler, src, dst, ts, label,test=False):
     val_acc, val_ap, val_f1, val_auc = [], [], [], []
     with torch.no_grad():
         tgan = tgan.eval()
-        TEST_BATCH_SIZE=1000
+        TEST_BATCH_SIZE=50
         num_test_instance = len(src)
         num_test_batch = math.ceil(num_test_instance / TEST_BATCH_SIZE)
         for k in range(num_test_batch):
@@ -115,7 +115,7 @@ def eval_one_epoch(hint, tgan, sampler, src, dst, ts, label,test=False):
             # val_f1.append(f1_score(true_label, pred_label))
             val_auc.append(roc_auc_score(true_label, pred_score))
             if test!= False:
-                print(tgan.getattention(src_l_cut, ts_l_cut, tgan.num_layers, NUM_NEIGHBORS))
+                tgan.getattention(src_l_cut, ts_l_cut, tgan.num_layers, NUM_NEIGHBORS,s_idx)
     return np.mean(val_acc), np.mean(val_ap), np.mean(val_f1), np.mean(val_auc)
 
 ### Load data and train val test split
