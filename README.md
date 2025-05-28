@@ -1,6 +1,6 @@
 Original repo: https://github.com/StatsDLMathsRecomSys/Inductive-representation-learning-on-temporal-graphs
-# Inductive Representation Learning on Temporal Graphs (ICLR 2020)
-<!--#### -->
+<!--# Inductive Representation Learning on Temporal Graphs (ICLR 2020)
+
 #### Authors: Da Xu*, Chuanwei Ruan*, Sushant Kumar, Evren Korpeoglu,  Kannan Achan
 #### Please contact Da.Xu@walmartlabs.com or Chuanwei.Ruan@walmartlabs.com for questions.
 
@@ -134,5 +134,63 @@ booktitle={International Conference on Learning Representations (ICLR)},
 year={2020}
 }
 ```
+-->
+
+## Running the experiments
+
+### Dataset and preprocessing
+
+#### Download the public data
+* [Reddit](http://snap.stanford.edu/jodie/reddit.csv)
+
+* [Wikipedia](http://snap.stanford.edu/jodie/wikipedia.csv)
+
+#### Preprocess the data
+We use the dense `npy` format to save the features in binary format. If edge features or nodes features are absent, it will be replaced by a vector of zeros. 
+```{bash}
+python process.py 
+```
+
+#### Use your own data
+Put your data under `processed` folder. The required input data includes `ml_${DATA_NAME}.csv`, `ml_${DATA_NAME}.npy` and `ml_${DATA_NAME}_node.npy`. They store the edge linkages, edge features and node features respectively. 
+
+The `CSV` file has following columns
+```
+u, i, ts, label, idx
+```
+, which represents source node index, target node index, time stamp, edge label and the edge index. 
+
+`ml_${DATA_NAME}.npy` has shape of [#temporal edges + 1, edge features dimention]. Similarly, `ml_${DATA_NAME}_node.npy` has shape of [#nodes + 1, node features dimension].
 
 
+All node index starts from `1`. The zero index is reserved for `null` during padding operations. So the maximum of node index equals to the total number of nodes. Similarly, maxinum of edge index equals to the total number of temporal edges. The padding embeddings or the null embeddings is a vector of zeros.
+
+### Requirements
+
+* python >= 3.7
+
+* Dependency
+
+```{bash}
+pandas==0.24.2
+torch==1.1.0
+tqdm==4.41.1
+numpy==1.16.4
+scikit_learn==0.22.1
+```
+
+### Command and configurations
+
+#### Sample commend
+
+* Learning the network using link prediction tasks
+```{bash}
+# t-gat learning on wikipedia data
+python -u learn_edge.py -d wikipedia --bs 200 --uniform  --n_degree 20 --agg_method attn --attn_mode prod --gpu 0 --n_head 2 --prefix hello_world
+
+also the number of heads and the savefile for the attention weights has to be changed in module.py tempconv function after the last if statement
+
+To use the Correlation_plots notebook the json file saved from the the learning and the csv gotten after preprocessing have to be used in the corr_plot function
+Example:
+uni_spear=plot_corr(uni_20_ep_wiki,spearmanr,11713,500)
+Here the uni_20_ep_wiki is the json file, spearmanr is the correlation used, 11713 is the number of testing instances and 500 is the amount of data before and after an instance averaged together.
