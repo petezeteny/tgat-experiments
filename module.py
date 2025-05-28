@@ -519,7 +519,7 @@ class TGAN(torch.nn.Module):
                                    src_ngn_edge_feat, 
                                    mask)
             if att==curr_layers:
-                filename="./saved_att/wikifull_uni_20ep.json"
+                filename="./saved_att/wikifull_no_uni_20ep_50nghs_2.json"
                 if os.path.exists(filename):
                     with open(filename, "r") as f:
                         try:
@@ -546,6 +546,6 @@ class TGAN(torch.nn.Module):
             return local
     def getattention(self, src_idx_l, cut_time_l, curr_layers, num_neighbors,s_idx):
             for layer in range(self.num_layers):
-                self.tem_conv(src_idx_l, cut_time_l, curr_layers=layer+1, num_neighbors=20,att=layer+1,s_idx=s_idx)
+                self.tem_conv(src_idx_l, cut_time_l, curr_layers=layer+1, num_neighbors=num_neighbors,att=layer+1,s_idx=s_idx)
                 
             

@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser('Interface for TGAT experiments on link predict
 parser.add_argument('-d', '--data', type=str, help='data sources to use, try wikipedia or reddit', default='wikipedia')
 parser.add_argument('--bs', type=int, default=200, help='batch_size')
 parser.add_argument('--prefix', type=str, default='', help='prefix to name the checkpoints')
-parser.add_argument('--n_degree', type=int, default=20, help='number of neighbors to sample')
+parser.add_argument('--n_degree', type=int, default=50, help='number of neighbors to sample')
 parser.add_argument('--n_head', type=int, default=2, help='number of heads used in attention layer')
 parser.add_argument('--n_epoch', type=int, default=50, help='number of epochs')
 parser.add_argument('--n_layer', type=int, default=2, help='number of network layers')

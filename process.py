@@ -60,14 +60,17 @@ def reindex(df):
 
 
 
-def run(data_name):
+def run(data_name, reindex=True):
     PATH = './processed/{}.csv'.format(data_name)
     OUT_DF = './processed/ml_{}.csv'.format(data_name)
     OUT_FEAT = './processed/ml_{}.npy'.format(data_name)
     OUT_NODE_FEAT = './processed/ml_{}_node.npy'.format(data_name)
     
     df, feat = preprocess(PATH)
-    new_df = reindex(df)
+    if reindex:
+        new_df = reindex(df)
+    else:
+        new_df = df
     
     print(feat.shape)
     empty = np.zeros(feat.shape[1])[np.newaxis, :]
@@ -86,5 +89,7 @@ def run(data_name):
     print(rand_feat[0:3,])
 #run('example')
 #run('wikipedia')
-run('wiki_50000')
+#run('wiki_50000')
+#run('rg17_mini', False)
+run('rg17_with_labels', False)
 #run('reddit')
